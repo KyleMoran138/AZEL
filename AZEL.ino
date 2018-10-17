@@ -1,12 +1,16 @@
 int MTR_PN = 13;
-int FWD_PN = 12;
-boolean FWD_EN = false;
+int DIR_PIN_ONE = 12;
+int DIR_PIN_TWO = 11;
+boolean DIR_EN_ONE = false;
+boolean DIR_EN_TWO = false;
 boolean MTR_EN = false;
 
 void setup() {
   pinMode(MTR_PN, OUTPUT);
-  pinMode(FWD_PN, OUTPUT);
-  digitalWrite(FWD_PN, FWD_EN);
+  pinMode(DIR_PIN_ONE, OUTPUT);
+  pinMode(DIR_PIN_TWO, OUTPUT);
+  digitalWrite(DIR_PIN_TWO, DIR_EN_TWO);
+  digitalWrite(DIR_PIN_ONE, DIR_EN_ONE);
   digitalWrite(MTR_PN, MTR_EN);
 }
 
@@ -28,8 +32,11 @@ void setMotor(bool EN){
 }
 
 void setFwd(bool EN){
-  FWD_EN = EN;
-  digitalWrite(FWD_PN, EN);
+  DIR_EN_ONE = EN;
+  DIR_EN_TWO = !EN;
+  digitalWrite(DIR_PIN_ONE, DIR_EN_ONE);
+  digitalWrite(DIR_PIN_TWO, DIR_EN_TWO);
+
 }
 
 
