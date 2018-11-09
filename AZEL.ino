@@ -3,7 +3,7 @@
 //To keep track of all arrays and the number of values
 const int NUM_SENSE_VALS = 2;
 const int NUM_CTRL_VALS = 3;
-const int SLACK = 50;
+const int SLACK = 5;
 
 // Control Pins
 // 0 = MTR_PN
@@ -24,15 +24,17 @@ float sensorValues[NUM_SENSE_VALS] = {0,0};
 bool reqStates[NUM_CTRL_VALS] = {false, false, false};
 
 void setup() {
-  for(int i = 0; i < NUM_CTRL_VALS-1; i++){
+  Serial.begin(9600);
+  Serial.println("Begin");
+  for(int i = 0; i < NUM_CTRL_VALS; i++){
     pinMode(CTRL_PINS[i], OUTPUT);
   }
 
-  for(int i = 0; i < NUM_SENSE_VALS-1; i++){
+  for(int i = 0; i < NUM_SENSE_VALS; i++){
     pinMode(SENSE_PINS[i], OUTPUT);
   }
 
-  for(int i = 0; i < NUM_CTRL_VALS-1; i++){
+  for(int i = 0; i < NUM_CTRL_VALS; i++){
     digitalWrite(CTRL_PINS[i], states[i]);
   }
 }
@@ -43,31 +45,30 @@ void loop() {
   calculateRequirements();
   // This is called at the end of the loop to react to input
   reactToData();
+  delay(500);
 }
 
 void calculateRequirements(){
-    reqStates[0] = (sensorValues[0] == sensorValues[1] || sensorValues[0] > sensorValues[1] - SLACK || sensorValues[0] < sensorValues[1] + SLACK );
-    reqStates[1] = (sensorValues[0] > sensorValues[1]);
-    reqStates[2] = (sensorValues[0] < sensorValues[1]);
-  //if(sensorValues[0] % sensorValues[1] != 0){
-  //  if(sensorValues[0] > sensorValues[1]){
-  //    reqStates = {true, true, false};
-  //  }else{
-  //    reqStates
-  //  }
-  //}else{
-  //  reqStates = {false, false, false};
-  //}
+    float dist = sensorValues[0] - sensorValues[1];
+    reqStates[0] = dist > SLACK || dist < -SLACK;
+    reqStates[1] = dist > SLACK;
+    reqStates[2] = dist < -SLACK;
+
+    Serial.println(reqStates[0]);
+    Serial.println(reqStates[1]);
+    Serial.println(reqStates[2]);
+    
 }
 
 void senseData(){
-  for(int i = 0; i < NUM_SENSE_VALS-1; i++){
+  for(int i = 0; i < NUM_SENSE_VALS; i++){
     sensorValues[i] = analogRead(SENSE_PINS[i]);
+    Serial.println("Sensor " + String(i) + " Value: " + String(sensorValues[i]));
   }
 }
 
 void reactToData(){
-  for(int i = 0; i < NUM_CTRL_VALS-1; i++){
+  for(int i = 0; i < NUM_CTRL_VALS; i++){
     if(states[i] != reqStates[i]){
       states[i] = reqStates[i];
       digitalWrite(CTRL_PINS[i], states[i]);
