@@ -3,6 +3,7 @@
 //To keep track of all arrays and the number of values
 const int NUM_SENSE_VALS = 2;
 const int NUM_CTRL_VALS = 3;
+const int SLACK = 50;
 
 // Control Pins
 // 0 = MTR_PN
@@ -45,11 +46,9 @@ void loop() {
 }
 
 void calculateRequirements(){
-  reqStates = {
-    ((sensorValues[0] % sensorValues[1]) != 0),
-    (sensorValues[0] > sensorValues[1]),
-    (sensorValues[0] < sensorValues[1])
-  };
+    reqStates[0] = (sensorValues[0] == sensorValues[1] || sensorValues[0] > sensorValues[1] - SLACK || sensorValues[0] < sensorValues[1] + SLACK );
+    reqStates[1] = (sensorValues[0] > sensorValues[1]);
+    reqStates[2] = (sensorValues[0] < sensorValues[1]);
   //if(sensorValues[0] % sensorValues[1] != 0){
   //  if(sensorValues[0] > sensorValues[1]){
   //    reqStates = {true, true, false};
@@ -75,4 +74,3 @@ void reactToData(){
     }
   }
 }
-
