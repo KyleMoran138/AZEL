@@ -18,7 +18,7 @@ const int SENSE_PINS[NUM_SENSE_VALS] = {A0, A1};
 
 //Variables for motor state
 bool states[NUM_CTRL_VALS] = {false, false, false};
-float sensorValues[NUM_SENSE_VALS] = {0,0};
+int sensorValues[NUM_SENSE_VALS] = {0,0};
 
 //Variables for motor control
 bool reqStates[NUM_CTRL_VALS] = {false, false, false};
@@ -40,9 +40,12 @@ void setup() {
 }
 
 void loop() {
+  // Polls light sensors for values and stores them in an array
   senseData();
 
+  // This will do the math from the obtained sensor data and prep the control values
   calculateRequirements();
+  
   // This is called at the end of the loop to react to input
   reactToData();
   delay(500);
@@ -53,7 +56,7 @@ void calculateRequirements(){
     reqStates[0] = dist > SLACK || dist < -SLACK;
     reqStates[1] = dist > SLACK;
     reqStates[2] = dist < -SLACK;
-
+    Serial.println("Diff: " + String(dist));
     Serial.println(reqStates[0]);
     Serial.println(reqStates[1]);
     Serial.println(reqStates[2]);
