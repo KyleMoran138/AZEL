@@ -1,7 +1,8 @@
 #include <math.h>  
-
+#include "Arduino.h";
+#include "PhotoResistor.h";
 //To keep track of all arrays and the number of values
-const int NUM_SENSE_VALS = 2;
+const int NUM_SENSE_VALS = 3;
 const int NUM_CTRL_VALS = 3;
 const int SLACK = 5;
 
@@ -14,14 +15,13 @@ const int CTRL_PINS[NUM_CTRL_VALS] = {13, 12, 11};
 // Sensor pins
 // 0 = LEFT_PHOTO
 // 1 = RIGHT_PHOTO
-const int SENSE_PINS[NUM_SENSE_VALS] = {A0, A1};
+const int SENSE_PINS[NUM_SENSE_VALS] = {A0, A1, A2};
 
-//Variables for motor state
-bool states[NUM_CTRL_VALS] = {false, false, false};
-int sensorValues[NUM_SENSE_VALS] = {0,0};
+int sensorValues[NUM_SENSE_VALS] = {0,0,0};
 
-//Variables for motor control
+//Variables for motor control and current states
 bool reqStates[NUM_CTRL_VALS] = {false, false, false};
+bool states[NUM_CTRL_VALS] = {false, false, false};
 
 void setup() {
   Serial.begin(9600);
