@@ -24,8 +24,11 @@ bool reqStates[NUM_CTRL_VALS] = {false, false, false};
 bool states[NUM_CTRL_VALS] = {false, false, false};
 
 void setup() {
+  #ifdef SERIAL_OUTPUT
   Serial.begin(9600);
   Serial.println("Begin");
+  #endif
+
   for(int i = 0; i < NUM_CTRL_VALS; i++){
     pinMode(CTRL_PINS[i], OUTPUT);
   }
@@ -56,17 +59,20 @@ void calculateRequirements(){
     reqStates[0] = dist > SLACK || dist < -SLACK;
     reqStates[1] = dist > SLACK;
     reqStates[2] = dist < -SLACK;
+    #ifdef SERIAL_OUTPUT
     Serial.println("Diff: " + String(dist));
     Serial.println(reqStates[0]);
     Serial.println(reqStates[1]);
     Serial.println(reqStates[2]);
-    
+    #endif
 }
 
 void senseData(){
   for(int i = 0; i < NUM_SENSE_VALS; i++){
     sensorValues[i] = analogRead(SENSE_PINS[i]);
+    #ifdef SERIAL_OUTPUT
     Serial.println("Sensor " + String(i) + " Value: " + String(sensorValues[i]));
+    #endif
   }
 }
 
@@ -74,7 +80,9 @@ void reactToData(){
   for(int i = 0; i < NUM_CTRL_VALS; i++){
     if(states[i] != reqStates[i]){
       states[i] = reqStates[i];
+      #ifdef SERIAL_OUTPUT
       digitalWrite(CTRL_PINS[i], states[i]);
+      #endif
     }
   }
 }
