@@ -1,14 +1,17 @@
+#ifndef SENSORARRAY_H
+#define SENSORARRAY_H
 #include "Arduino.h";
-#include "PhotoResistor.h";
+#include "Sensor.h";
 
 class SensorArray{
   
   public:
     float* allSensorValues;
 
-    SensorArray(Sensor Sensors[], int* sensorCount);
-    SensorArray(Sensor Sensors[], int* sensorCount, float perSensorTol,
+    SensorArray(Sensor **Sensors, int sensorCount);
+    SensorArray(Sensor **Sensors, int sensorCount, float perSensorTol,
       float sensorDiffTol, bool invertResults);
+    float SensorArray::getSensorValue(int sensor);
     void readAllSensorValues();
     void calculateAngle(float targetValue);
     
@@ -18,6 +21,7 @@ class SensorArray{
     int _sensorCount;
     int _id;
     bool _INVERT_RESULTS = false;
-    Sensor*   _allSensors;
+    Sensor  **_allSensors;
   
 };
+#endif

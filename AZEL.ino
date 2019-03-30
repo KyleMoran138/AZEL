@@ -1,6 +1,8 @@
-#include <math.h>  
+#include <math.h>;
 #include "Arduino.h";
+#include "Sensor.h";
 #include "PhotoResistor.h";
+#include "SensorArray.h"
 //To keep track of all arrays and the number of values
 const int NUM_SENSE_VALS = 3;
 const int NUM_CTRL_VALS = 3;
@@ -16,17 +18,23 @@ const int CTRL_PINS[NUM_CTRL_VALS] = {13, 12, 11};
 // 0 = LEFT_PHOTO
 // 1 = RIGHT_PHOTO
 const int SENSE_PINS[NUM_SENSE_VALS] = {A0, A1, A2};
+const float SENSE_PINS_LOCATION[NUM_SENSE_VALS] = {.25, 0, .75};
+bool isDed = false;
 
-int sensorValues[NUM_SENSE_VALS] = {0,0,0};
+Sensor *all_sensors[NUM_SENSE_VALS];
+SensorArray *senArr;
 
 //Variables for motor control and current states
 bool reqStates[NUM_CTRL_VALS] = {false, false, false};
 bool states[NUM_CTRL_VALS] = {false, false, false};
 
+#define SERIAL_OUTPUT
+
 void setup() {
   #ifdef SERIAL_OUTPUT
-  Serial.begin(9600);
-  Serial.println("Begin");
+    Serial.begin(9600);
+    delay(500);
+    Serial.println("Begin");
   #endif
 
   for(int i = 0; i < NUM_CTRL_VALS; i++){
@@ -34,55 +42,30 @@ void setup() {
   }
 
   for(int i = 0; i < NUM_SENSE_VALS; i++){
-    pinMode(SENSE_PINS[i], OUTPUT);
+    pinMode(SENSE_PINS[i], INPUT);
   }
 
   for(int i = 0; i < NUM_CTRL_VALS; i++){
     digitalWrite(CTRL_PINS[i], states[i]);
   }
+
+  // Give the board some time to set up the ports
+  delay(1000);
+
+  for(int i = 0; i < NUM_SENSE_VALS; i++){
+    all_sensors[i] = new PhotoResistor(SENSE_PINS[i], SENSE_PINS_LOCATION[i]);
+  }
+
+  senArr = new SensorArray(all_sensors, NUM_SENSE_VALS);
+
 }
 
 void loop() {
-  // Polls light sensors for values and stores them in an array
-  senseData();
-
-  // This will do the math from the obtained sensor data and prep the control values
-  calculateRequirements();
-  
-  // This is called at the end of the loop to react to input
-  reactToData();
-  delay(500);
-}
-
-void calculateRequirements(){
-    float dist = sensorValues[0] - sensorValues[1];
-    reqStates[0] = dist > SLACK || dist < -SLACK;
-    reqStates[1] = dist > SLACK;
-    reqStates[2] = dist < -SLACK;
-    #ifdef SERIAL_OUTPUT
-    Serial.println("Diff: " + String(dist));
-    Serial.println(reqStates[0]);
-    Serial.println(reqStates[1]);
-    Serial.println(reqStates[2]);
-    #endif
-}
-
-void senseData(){
-  for(int i = 0; i < NUM_SENSE_VALS; i++){
-    sensorValues[i] = analogRead(SENSE_PINS[i]);
-    #ifdef SERIAL_OUTPUT
-    Serial.println("Sensor " + String(i) + " Value: " + String(sensorValues[i]));
-    #endif
+  //Serial.println("loop");
+  if(!isDed){
+    isDed = true;
+    senArr->readAllSensorValues();
+    senArr->calculateAngle(500);
   }
-}
-
-void reactToData(){
-  for(int i = 0; i < NUM_CTRL_VALS; i++){
-    if(states[i] != reqStates[i]){
-      states[i] = reqStates[i];
-      #ifdef SERIAL_OUTPUT
-      digitalWrite(CTRL_PINS[i], states[i]);
-      #endif
-    }
-  }
+  delay(1000);
 }

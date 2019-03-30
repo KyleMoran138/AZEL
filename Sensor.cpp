@@ -1,5 +1,7 @@
 #include "Sensor.h";
 
+Sensor::Sensor(){};
+
 Sensor::Sensor(int pin_id, float pos){
   this->_pin_id = pin_id;
   this->_pos = pos;
@@ -15,6 +17,8 @@ Sensor::Sensor(int pin_id, float pos, float weight){
 };
 
 float Sensor::readFloat(){
+  delay(50);
   value = analogRead(_pin_id);
+  delay(50);
   return value;
 };

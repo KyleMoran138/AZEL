@@ -1,9 +1,12 @@
+#ifndef SENSOR_H
+#define SENSOR_H
 #include "Arduino.h";
 
 class Sensor{
   public: 
     float value;
 
+    Sensor();
     Sensor(int pin_id, float pos);
     Sensor(int pin_id, float pos, float weight);
     float readFloat();
@@ -28,3 +31,4 @@ class Sensor{
     float _pos;
     float _weight;
 };
+#endif
