@@ -26,9 +26,12 @@ class Sensor{
     // Distance from the "goal"
     float d_f_g;
 
+    float pos;
+
+    float Sensor::getValueChangePerDistanceUnit(Sensor* sensorTwo);
+
   protected:
     int   _pin_id;
-    float _pos;
     float _weight;
 };
 #endif

@@ -65,7 +65,8 @@ void loop() {
   if(!isDed){
     isDed = true;
     senArr->readAllSensorValues();
-    senArr->calculateAngle(500);
+    senArr->calculateAngle(0);
+    senArr->getDistanceToRotateBy(senArr->getSensorIndexClosestToTarget());
   }
   delay(1000);
 }

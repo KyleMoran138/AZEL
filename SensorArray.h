@@ -14,6 +14,8 @@ class SensorArray{
     float SensorArray::getSensorValue(int sensor);
     void readAllSensorValues();
     void calculateAngle(float targetValue);
+    int SensorArray::getSensorIndexClosestToTarget();
+    void SensorArray::getDistanceToRotateBy(int closestSensorIndex);
     
   private:
     float  _PER_SENSOR_TOLERANCE = 10;

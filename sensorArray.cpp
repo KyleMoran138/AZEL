@@ -50,9 +50,7 @@ void SensorArray::calculateAngle(float targetValue){
     sen->d_u_lt = sen->d_u < -this->_PER_SENSOR_TOLERANCE;
     sen->d_d_gt = sen->d_d > this->_PER_SENSOR_TOLERANCE;
     sen->d_d_lt = sen->d_d < -this->_PER_SENSOR_TOLERANCE;
-    sen->d_f_g = targetValue - sen->value;
-
-    
+    sen->d_f_g = abs(targetValue - sen->value);
 
     #ifdef SERIAL_OUTPUT_SENSORARRAY
       Serial.print("Sensor [");
@@ -75,6 +73,55 @@ void SensorArray::calculateAngle(float targetValue){
       Serial.println(sen->d_f_g);
       Serial.print('\n');
     #endif
+  }
+}
+
+int SensorArray::getSensorIndexClosestToTarget(){
+  int closestSensorIndex = -1;
+  int closestDiff = -1;
+  for(int i = 0; i < this->_sensorCount; i++){
+    Sensor* sen = this->_allSensors[i];
+    delay(300);
+    if(closestDiff < 0 || sen->d_f_g < closestDiff){
+      closestDiff = sen->d_f_g;
+      closestSensorIndex = i;
+    }
+  }
+  #ifdef SERIAL_OUTPUT_SENSORARRAY
+    Serial.print("Closest sensor index: ");
+    Serial.println(closestSensorIndex);
+  #endif
+  return closestSensorIndex;
+}
+
+void SensorArray::getDistanceToRotateBy(int closestSensorIndex){
+  Sensor* closestSensor = this->_allSensors[closestSensorIndex];
+  if(!closestSensor->d_u_lt && !closestSensor->d_d_lt ){
+    return;    
+  }
+  if(closestSensor->d_u_lt){
+    int sensorIndexUp = closestSensorIndex++;
+    if(closestSensorIndex >= this->_sensorCount){
+      sensorIndexUp = 0;
+    }
+    if(closestSensorIndex <= 0){
+      sensorIndexUp = this->_sensorCount;
+    }
+    float valueChangePerDegree = closestSensor->getValueChangePerDistanceUnit(this->_allSensors[sensorIndexUp]);
+    Serial.print("Sensor up step values: ");
+    Serial.println(valueChangePerDegree);
+  }
+  if(closestSensor->d_d_lt){
+    int sensorIndexDown = closestSensorIndex++;
+    if(closestSensorIndex >= this->_sensorCount){
+      sensorIndexDown = 0;
+    }
+    if(closestSensorIndex <= 0){
+      sensorIndexDown = this->_sensorCount;
+    }
+    float valueChangePerDegree = closestSensor->getValueChangePerDistanceUnit(this->_allSensors[sensorIndexDown]);
+    Serial.print("Sensor down step values: ");
+    Serial.println(valueChangePerDegree);
   }
 }
 
