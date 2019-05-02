@@ -1,7 +1,7 @@
 #ifndef SENSORARRAY_H
 #define SENSORARRAY_H
-#include "Arduino.h";
-#include "Sensor.h";
+#include "Arduino.h"
+#include "Sensor.h"
 
 class SensorArray{
   
@@ -9,17 +9,15 @@ class SensorArray{
     float* allSensorValues;
 
     SensorArray(Sensor **Sensors, int sensorCount);
-    SensorArray(Sensor **Sensors, int sensorCount, float perSensorTol,
-      float sensorDiffTol, bool invertResults);
-    float SensorArray::getSensorValue(int sensor);
+    SensorArray(Sensor **Sensors, int sensorCount, float perSensorTol, bool invertResults);
+    float getSensorValue(int sensor);
     void readAllSensorValues();
-    void calculateAngle(float targetValue);
-    int SensorArray::getSensorIndexClosestToTarget();
-    void SensorArray::getDistanceToRotateBy(int closestSensorIndex);
+    void calculateAngle();
+    int getSensorTurnDirection(int forwardSensorIndex, float target);
+    void getDistanceToRotateBy(int forwardSensorIndex, float target);
     
   private:
-    float  _PER_SENSOR_TOLERANCE = 10;
-    float  _SENSOR_DIFFERENCE_TOLERANCE = 10;
+    float  _PER_SENSOR_TOLERANCE = 50;
     int _sensorCount;
     int _id;
     bool _INVERT_RESULTS = false;

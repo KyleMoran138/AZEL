@@ -1,4 +1,4 @@
-#include "PhotoResistor.h";
+#include "PhotoResistor.h"
 
 PhotoResistor::PhotoResistor(int pin_id, float pos) : Sensor(pin_id, pos){
   this->_weight = 0.0;

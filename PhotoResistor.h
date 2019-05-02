@@ -1,7 +1,7 @@
 #ifndef PHOTORESISTOR_H
 #define PHOTORESISTOR_H
-#include "Arduino.h";
-#include "Sensor.h";
+#include "Arduino.h"
+#include "Sensor.h"
 
 class PhotoResistor : public Sensor{
   

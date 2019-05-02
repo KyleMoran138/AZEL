@@ -1,7 +1,7 @@
-#include <math.h>;
-#include "Arduino.h";
-#include "Sensor.h";
-#include "PhotoResistor.h";
+#include <math.h>
+#include "Arduino.h"
+#include "Sensor.h"
+#include "PhotoResistor.h"
 #include "SensorArray.h"
 //To keep track of all arrays and the number of values
 const int NUM_SENSE_VALS = 3;
@@ -65,8 +65,12 @@ void loop() {
   if(!isDed){
     isDed = true;
     senArr->readAllSensorValues();
-    senArr->calculateAngle(0);
-    senArr->getDistanceToRotateBy(senArr->getSensorIndexClosestToTarget());
+    senArr->calculateAngle();
+    int dir = senArr->getSensorTurnDirection(1, 1024);
+    Serial.print("Dir to turn: ");
+    Serial.println(dir);
+    senArr->getDistanceToRotateBy(1, 1024);
+
   }
   delay(1000);
 }

@@ -1,6 +1,6 @@
 #ifndef SENSOR_H
 #define SENSOR_H
-#include "Arduino.h";
+#include "Arduino.h"
 
 class Sensor{
   public: 
@@ -23,12 +23,10 @@ class Sensor{
     bool d_d_gt;
     bool d_d_lt;
 
-    // Distance from the "goal"
-    float d_f_g;
-
     float pos;
 
-    float Sensor::getValueChangePerDistanceUnit(Sensor* sensorTwo);
+    float getValueChangePerDistanceUnit(Sensor* sensorTwo);
+    bool SensorDifferenceSumZero();
 
   protected:
     int   _pin_id;
