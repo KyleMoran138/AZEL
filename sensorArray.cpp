@@ -28,7 +28,7 @@ void SensorArray::readAllSensorValues(){
 
 void SensorArray::calculateAngle(){
   for(int i = 0; i < this->_sensorCount; i++){
-    delay(300);
+    delay(20);
     Sensor* senUp;
     Sensor* sen = this->_allSensors[i];
     Sensor* senDown;
@@ -90,8 +90,7 @@ int SensorArray::getSensorTurnDirection(int forwardSensorIndex, float target){
 
     if(forwardSensor->value > target && forwardSensor->value > target + this->_PER_SENSOR_TOLERANCE) valueAboveTargetOrBelow = 1;
     if(forwardSensor->value < target && forwardSensor->value < target - this->_PER_SENSOR_TOLERANCE) valueAboveTargetOrBelow = -1;
-    // Serial.print("Value compared to target: ");
-    // Serial.println(valueAboveTargetOrBelow);
+
     if(valueAboveTargetOrBelow == 0) return 0;
     if(senUp->SensorDifferenceSumZero() && senDown->SensorDifferenceSumZero() && true) return 0;
 
@@ -105,10 +104,8 @@ int SensorArray::getSensorTurnDirection(int forwardSensorIndex, float target){
           return 0;
         }
       }else if(forwardSensor->d_d_lt){
-        //go twards down
         return -1;
       }else if(forwardSensor->d_u_lt){
-        //go twoards up
         return 1;
       }
     }else if(valueAboveTargetOrBelow == 1){
@@ -121,38 +118,29 @@ int SensorArray::getSensorTurnDirection(int forwardSensorIndex, float target){
           return 0;
         }
       }else if(forwardSensor->d_d_gt){
-        //go twards down
         return -1;
       }else if(forwardSensor->d_u_gt){
-        //go twoards up
         return 1;
       }
     }
-    // Serial.println("Reached end of function");
+
     return 0;
 }
 
-void SensorArray::getDistanceToRotateBy(int forwardSensorIndex, float target){
+float SensorArray::getDistanceToRotateBy(int forwardSensorIndex, float target, int directionToRotate){
+  if(forwardSensorIndex + directionToRotate == forwardSensorIndex) return 0;
   Sensor* closestSensor = this->_allSensors[forwardSensorIndex];
-  int directionToRotate = this->getSensorTurnDirection(forwardSensorIndex, target);
-  if( directionToRotate == 0 ){
-    Serial.print("Rotate: ");
-    Serial.println(directionToRotate);
-    return;    
-  }
-  if(directionToRotate == 1){
-    int sensorIndexUp = forwardSensorIndex++;
-    if(forwardSensorIndex >= this->_sensorCount){
-      sensorIndexUp = 0;
-    }
-    if(forwardSensorIndex <= 0){
-      sensorIndexUp = this->_sensorCount;
-    }
-    float valueChangePerDegree = closestSensor->getValueChangePerDistanceUnit(this->_allSensors[sensorIndexUp]);
-    Serial.print("Sensor up step values: ");
-    Serial.println(valueChangePerDegree);
-  }
+  int sensorIndexUp = forwardSensorIndex += directionToRotate;
   
+  if(forwardSensorIndex >= this->_sensorCount-1){
+    sensorIndexUp = 0;
+  }else if(forwardSensorIndex < 0){
+    sensorIndexUp = this->_sensorCount-1;
+  }
+
+  float valuesPerOneDegree = closestSensor->getValueChangePerDistanceUnit(this->_allSensors[sensorIndexUp]);
+  return (valuesPerOneDegree / this->_allSensors[sensorIndexUp]->value);
+
 }
 
 float SensorArray::getSensorValue(int sensor){

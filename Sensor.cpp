@@ -20,16 +20,22 @@ Sensor::Sensor(int pin_id, float pos, float weight){
 
 float Sensor::getValueChangePerDistanceUnit(Sensor* sensorTwo){
   float spaceBetweenSensors = abs(this->pos - sensorTwo->pos);
-  Serial.print("base sensor loc: ");
-  Serial.println(this->pos);
-  Serial.print("second sensor loc: ");
-  Serial.println(sensorTwo->pos);
-  Serial.print("Distance between sensors: ");
-  Serial.println(spaceBetweenSensors);
-  int valueDiffBetweenSensors = abs(this->value - sensorTwo->value);
-  Serial.print("Value difference between sensors");
-  Serial.println(valueDiffBetweenSensors);
-  return valueDiffBetweenSensors / ( spaceBetweenSensors * 100 );
+  float valueDiffBetweenSensors = abs(this->value - sensorTwo->value);
+  float modifyer = 1;
+
+  if(spaceBetweenSensors > 1){
+    modifyer = (spaceBetweenSensors / 1) ;
+  }else if(spaceBetweenSensors < 1){
+    modifyer = (1 / spaceBetweenSensors) - 1;
+  }
+  float valuesPerDegree = valueDiffBetweenSensors * modifyer;
+
+  Serial.print("Values per degree ");
+  Serial.println(valuesPerDegree);
+  Serial.print("Degrees needed to face: ");
+  Serial.println("help");
+
+  return 0;
 }
 
 float Sensor::readFloat(){

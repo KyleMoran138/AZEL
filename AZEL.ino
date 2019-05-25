@@ -3,16 +3,18 @@
 #include "Sensor.h"
 #include "PhotoResistor.h"
 #include "SensorArray.h"
+#include "Stepper.h"
 //To keep track of all arrays and the number of values
 const int NUM_SENSE_VALS = 3;
-const int NUM_CTRL_VALS = 3;
+const int NUM_CTRL_VALS = 4;
 const int SLACK = 5;
 
 // Control Pins
-// 0 = MTR_PN
-// 1 = DIR_PIN_ONE
-// 2 = DIR_PIN_TWO
-const int CTRL_PINS[NUM_CTRL_VALS] = {13, 12, 11};
+// 0 =  A
+// 1 = A|
+// 2 = B
+// 3 = B|
+const int CTRL_PINS[NUM_CTRL_VALS] = {11, 9, 10, 8};
 
 // Sensor pins
 // 0 = LEFT_PHOTO
@@ -23,6 +25,7 @@ bool isDed = false;
 
 Sensor *all_sensors[NUM_SENSE_VALS];
 SensorArray *senArr;
+Stepper  *motorOne;
 
 //Variables for motor control and current states
 bool reqStates[NUM_CTRL_VALS] = {false, false, false};
@@ -57,7 +60,7 @@ void setup() {
   }
 
   senArr = new SensorArray(all_sensors, NUM_SENSE_VALS);
-
+  motorOne = new Stepper();
 }
 
 void loop() {
@@ -69,7 +72,12 @@ void loop() {
     int dir = senArr->getSensorTurnDirection(1, 1024);
     Serial.print("Dir to turn: ");
     Serial.println(dir);
-    senArr->getDistanceToRotateBy(1, 1024);
+    if(dir != 0){
+      Serial.println(senArr->getDistanceToRotateBy(1, 1024, dir));
+      // Serial.print("Degrees to turn: ");
+      // Serial.println(4);
+      motorOne->DoStep(dir==1, 10);
+    }
 
   }
   delay(1000);
