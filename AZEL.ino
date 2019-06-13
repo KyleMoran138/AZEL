@@ -5,7 +5,7 @@
 #include "SensorArray.h"
 #include "Stepper.h"
 //To keep track of all arrays and the number of values
-const int NUM_SENSE_VALS = 3;
+const int NUM_SENSE_VALS = 5;
 const int NUM_CTRL_VALS = 4;
 const int SLACK = 5;
 
@@ -19,8 +19,8 @@ const int CTRL_PINS[NUM_CTRL_VALS] = {11, 9, 10, 8};
 // Sensor pins
 // 0 = LEFT_PHOTO
 // 1 = RIGHT_PHOTO
-const int SENSE_PINS[NUM_SENSE_VALS] = {A0, A1, A2};
-const float SENSE_PINS_LOCATION[NUM_SENSE_VALS] = {.25, 0, .75};
+const int SENSE_PINS[NUM_SENSE_VALS] = {A0, A1, A2, A3, A4};
+const float SENSE_PINS_LOCATION[NUM_SENSE_VALS] = {.2, .4, .6, .8, 1};
 bool isDed = false;
 
 Sensor *all_sensors[NUM_SENSE_VALS];
@@ -35,7 +35,7 @@ bool states[NUM_CTRL_VALS] = {false, false, false};
 
 void setup() {
   #ifdef SERIAL_OUTPUT
-    Serial.begin(9600);
+    Serial.begin(230400);
     delay(500);
     Serial.println("Begin");
   #endif
@@ -69,16 +69,16 @@ void loop() {
     isDed = true;
     senArr->readAllSensorValues();
     senArr->calculateAngle();
-    int dir = senArr->getSensorTurnDirection(1, 1024);
+    int dir = senArr->getSensorTurnDirection(2, 1024);
     Serial.print("Dir to turn: ");
     Serial.println(dir);
     if(dir != 0){
-      Serial.println(senArr->getDistanceToRotateBy(1, 1024, dir));
+      Serial.println(senArr->getDistanceToRotateBy(2, 1024, dir));
       // Serial.print("Degrees to turn: ");
       // Serial.println(4);
       motorOne->DoStep(dir==1, 10);
     }
 
   }
-  delay(1000);
+  delay(10);
 }

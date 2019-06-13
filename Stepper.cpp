@@ -4,7 +4,7 @@ Stepper::Stepper(){
 }
 
 void Stepper::DoStep(bool CW, int count){
-  for(int i =0; i < count; i++){
+  for(int i =0; i < count/4; i++){
     if(CW){
       this->_stepCW();
     }else{
