@@ -71,22 +71,39 @@ void SensorArray::calculateAngle(){
   }
 }
 
+int SensorArray::GetSensorDownIndex(int currentSensorIndex, bool respectPosition = false){
+  Sensor* currentSensor = this->_allSensors[currentSensorIndex];
+  int indexToReturn = currentSensorIndex+1;
+  if(currentSensorIndex - 1 <= -1){
+    indexToReturn = this->_sensorCount-1;
+  }
+
+  if(respectPosition && indexToReturn == this->_sensorCount-1){
+    indexToReturn = -1;
+  }
+  return indexToReturn;
+}
+
+int SensorArray::GetSensorUpIndex(int currentSensorIndex, bool respectPosition = false){
+  Sensor* currentSensor = this->_allSensors[currentSensorIndex];
+  int indexToReturn = currentSensorIndex + 1;
+  if(currentSensorIndex + 1 >= this->_sensorCount-1){
+    indexToReturn = 0;
+  }
+
+  if(respectPosition && indexToReturn == 0){
+    indexToReturn = -1;
+  }
+
+  return indexToReturn;
+}
+
 int SensorArray::getSensorTurnDirection(int forwardSensorIndex, float target){
     int valueAboveTargetOrBelow = 0;
 
-    Sensor* senUp;
+    Sensor* senUp = this->_allSensors[this->GetSensorUpIndex(forwardSensorIndex)];
     Sensor* forwardSensor = this->_allSensors[forwardSensorIndex];
-    Sensor* senDown;
-    if(forwardSensorIndex >= this->_sensorCount-1){
-      senUp = this->_allSensors[0];
-    }else{
-      senUp = this->_allSensors[forwardSensorIndex+1];
-    }
-    if(forwardSensorIndex == 0){
-      senDown = this->_allSensors[this->_sensorCount-1];
-    }else{
-      senDown = this->_allSensors[forwardSensorIndex-1];
-    }
+    Sensor* senDown = this->_allSensors[this->GetSensorDownIndex(forwardSensorIndex)];
 
     if(forwardSensor->value > target && forwardSensor->value > target + this->_PER_SENSOR_TOLERANCE) valueAboveTargetOrBelow = 1;
     if(forwardSensor->value < target && forwardSensor->value < target - this->_PER_SENSOR_TOLERANCE) valueAboveTargetOrBelow = -1;
@@ -101,6 +118,8 @@ int SensorArray::getSensorTurnDirection(int forwardSensorIndex, float target){
         }else if(abs(senUp->value - target) < abs(senDown->value - target)){
           return 1;
         }else{
+          //If these arent the last sensors on the side then Get the next one away else use this one
+          // Then figure out which one is close to the target and then steer twoards it
           return 0;
         }
       }else if(forwardSensor->d_d_lt){

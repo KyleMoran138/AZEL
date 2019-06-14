@@ -66,7 +66,7 @@ void setup() {
 void loop() {
   //Serial.println("loop");
   if(!isDed){
-    isDed = true;
+    // isDed = true;
     senArr->readAllSensorValues();
     senArr->calculateAngle();
     int dir = senArr->getSensorTurnDirection(2, 1024);

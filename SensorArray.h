@@ -15,6 +15,9 @@ class SensorArray{
     void calculateAngle();
     int getSensorTurnDirection(int forwardSensorIndex, float target);
     float getDistanceToRotateBy(int forwardSensorIndex, float target, int directionToRotate);
+    int GetSensorDownIndex(int currentSensor, bool respectPosition);
+    int GetSensorUpIndex(int currentSensor, bool respectPosition);
+
     
   private:
     float  _PER_SENSOR_TOLERANCE = 50;
