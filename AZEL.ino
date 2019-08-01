@@ -64,18 +64,14 @@ void setup() {
 }
 
 void loop() {
-  //Serial.println("loop");
   if(!isDed){
     // isDed = true;
     senArr->readAllSensorValues();
     senArr->calculateAngle();
     int dir = senArr->getSensorTurnDirection(2, 1024);
-    Serial.print("Dir to turn: ");
-    Serial.println(dir);
+    //Serial.println(dir);
     if(dir != 0){
-      Serial.println(senArr->getDistanceToRotateBy(2, 1024, dir));
-      // Serial.print("Degrees to turn: ");
-      // Serial.println(4);
+      int dirToRotate = senArr->getDistanceToRotateBy(2, 1024, dir);
       motorOne->DoStep(dir==1, 10);
     }
 
