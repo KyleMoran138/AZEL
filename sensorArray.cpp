@@ -2,25 +2,37 @@
 
 // The default sensor layout is in a circle and will go counter
 // clockwise. The top of the circle will be both 0 and 1.
- #define SERIAL_OUTPUT_SENSORARRAY
+
+// #define SERIAL_OUTPUT_SENSORARRAY
+#define SERIAL_OUTPUT_HUMAN_DATA
+
 SensorArray::SensorArray(Sensor **Sensors, int sensorCount){
+  const int count = 56;
   this->_allSensors = Sensors;
   this->_sensorCount = sensorCount;
-  this->allSensorValues = new float[sensorCount]();
+  this->_initSensorArrays(sensorCount);
 }
 
 SensorArray::SensorArray(Sensor **Sensors, int sensorCount, float perSensorTol, bool invertResults){
   this->_allSensors = Sensors;
   this->_sensorCount = sensorCount;
-  this->allSensorValues = new float[sensorCount]();
   this->_PER_SENSOR_TOLERANCE = perSensorTol;
   this->_INVERT_RESULTS = invertResults;
+  this->_initSensorArrays(sensorCount);
+}
+
+void SensorArray::readRollingAverage(){
+  for(int i = this->_CURRENT_ROLLING_PERIOD; i < this->_ROLLING_AVERAGE_PERIOD_COUNT; i++){
+    this->readAllSensorValues();
+    delay(this->_ROLLING_AVERAGE_PERIOD_TIME);
+  }
 }
 
 void SensorArray::readAllSensorValues(){
   for(int i = 0; i < this->_sensorCount; i++){
     if(i > this->_sensorCount) continue;
-    this->allSensorValues[i] = _allSensors[i]->readFloat();
+    this->allSensorValues[i][this->_CURRENT_ROLLING_PERIOD] = _allSensors[i]->readFloat();
+    this->_stepRollingAveragePeriod();
   }
 }
 
@@ -55,10 +67,13 @@ void SensorArray::calculateAngle(){
         Serial.println("");
       }
     #endif
+    #ifdef SERIAL_OUTPUT_HUMAN_DATA
+      Serial.println("TEST");
+    #endif
   }
 }
 
-int SensorArray::GetSensorDownIndex(int currentSensorIndex, bool respectPosition = false){
+int SensorArray::getSensorDownIndex(int currentSensorIndex, bool respectPosition = false){
   Sensor* currentSensor = this->_allSensors[currentSensorIndex];
   int indexToReturn = currentSensorIndex+1;
   if(currentSensorIndex - 1 <= -1){
@@ -71,7 +86,7 @@ int SensorArray::GetSensorDownIndex(int currentSensorIndex, bool respectPosition
   return indexToReturn;
 }
 
-int SensorArray::GetSensorUpIndex(int currentSensorIndex, bool respectPosition = false){
+int SensorArray::getSensorUpIndex(int currentSensorIndex, bool respectPosition = false){
   Sensor* currentSensor = this->_allSensors[currentSensorIndex];
   int indexToReturn = currentSensorIndex + 1;
   if(currentSensorIndex + 1 >= this->_sensorCount-1){
@@ -88,9 +103,9 @@ int SensorArray::GetSensorUpIndex(int currentSensorIndex, bool respectPosition =
 int SensorArray::getSensorTurnDirection(int forwardSensorIndex, float target){
     int valueAboveTargetOrBelow = 0;
 
-    Sensor* senUp = this->_allSensors[this->GetSensorUpIndex(forwardSensorIndex)];
+    Sensor* senUp = this->_allSensors[this->getSensorUpIndex(forwardSensorIndex)];
     Sensor* forwardSensor = this->_allSensors[forwardSensorIndex];
-    Sensor* senDown = this->_allSensors[this->GetSensorDownIndex(forwardSensorIndex)];
+    Sensor* senDown = this->_allSensors[this->getSensorDownIndex(forwardSensorIndex)];
 
     if(forwardSensor->value > target && forwardSensor->value > target + this->_PER_SENSOR_TOLERANCE) valueAboveTargetOrBelow = 1;
     if(forwardSensor->value < target && forwardSensor->value < target - this->_PER_SENSOR_TOLERANCE) valueAboveTargetOrBelow = -1;
@@ -149,6 +164,35 @@ float SensorArray::getDistanceToRotateBy(int forwardSensorIndex, float target, i
 
 }
 
-float SensorArray::getSensorValue(int sensor){
-  return this->allSensorValues[sensor];
+/**
+ * This will get a specific sensors rolling average if the periodIndex is undefined
+ * This will get a specific sensors value for a specific period if the periodIndex is defined 
+ * This will return -1 if the period index is invalid
+ */
+float SensorArray::getSensorValue(int sensor, int periodIndex=-1){
+  if(periodIndex != -1 && (periodIndex < 0 || periodIndex >= this->_ROLLING_AVERAGE_PERIOD_COUNT) ) return -1;
+  if(periodIndex != -1 ) return this->allSensorValues[sensor][periodIndex];
+  float totalValue = 0;
+  for(int i = 0; i < this->_ROLLING_AVERAGE_PERIOD_COUNT-1; i++){
+    float senValue =  this->allSensorValues[sensor][i];
+    totalValue = totalValue + senValue;
+  }
+  return totalValue / this->_ROLLING_AVERAGE_PERIOD_COUNT;
 };
+
+/**
+ * This will set empty arrays for all sensor values
+ */
+void SensorArray::_initSensorArrays(int sensorCount){
+  this->allSensorValues =  new float*[this->_sensorCount-1];
+  for(int i = 0; i < this->_sensorCount-1; i++){
+    this->allSensorValues[i] = new float[this->_ROLLING_AVERAGE_PERIOD_COUNT-1];
+  }
+}
+
+void SensorArray::_stepRollingAveragePeriod(){
+  this->_CURRENT_ROLLING_PERIOD++;
+  if(this->_CURRENT_ROLLING_PERIOD >= this->_ROLLING_AVERAGE_PERIOD_COUNT){
+    this->_CURRENT_ROLLING_PERIOD = 0;
+  }
+}

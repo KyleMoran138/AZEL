@@ -4,6 +4,7 @@
 #include "PhotoResistor.h"
 #include "SensorArray.h"
 #include "Stepper.h"
+
 //To keep track of all arrays and the number of values
 const int NUM_SENSE_VALS = 5;
 const int NUM_CTRL_VALS = 4;
@@ -30,6 +31,9 @@ Stepper  *motorOne;
 //Variables for motor control and current states
 bool reqStates[NUM_CTRL_VALS] = {false, false, false};
 bool states[NUM_CTRL_VALS] = {false, false, false};
+
+// AZEL.ino SERIAL_OUTPUT = enable the serial ports
+// sensorArray.cpp SERIAL_OUTPUT_SENSORARRAY = csv values
 
 #define SERIAL_OUTPUT
 
@@ -66,7 +70,7 @@ void setup() {
 void loop() {
   if(!isDed){
     // isDed = true;
-    senArr->readAllSensorValues();
+    senArr->readRollingAverage();
     senArr->calculateAngle();
     int dir = senArr->getSensorTurnDirection(2, 1024);
     //Serial.println(dir);
